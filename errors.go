@@ -20,3 +20,13 @@ func (e *InvalidLoadError) Error() string {
 
 	return fmt.Sprintf("envconfig: Load(nil %s)", e.Type.String())
 }
+
+// InvalidTypeError describes an environment variable was not appropriate for a value of a specific Go type.
+type InvalidTypeError struct {
+	Key  string
+	Type reflect.Type
+}
+
+func (e *InvalidTypeError) Error() string {
+	return fmt.Sprintf("envconfig: cannot load %s into Go value of type %s", e.Key, e.Type.String())
+}

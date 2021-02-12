@@ -1,7 +1,6 @@
 package envconfig
 
 import (
-	"fmt"
 	"math/bits"
 	"os"
 	"reflect"
@@ -57,7 +56,9 @@ func load(rv reflect.Value) error {
 				}
 
 			default:
-				continue
+				if hasTag(stf) {
+					return &InvalidTypeError{getTag(stf), frv.Type()}
+				}
 			}
 
 		case reflect.Struct:
@@ -84,7 +85,9 @@ func load(rv reflect.Value) error {
 			}
 
 		default:
-			continue
+			if hasTag(stf) {
+				return &InvalidTypeError{getTag(stf), frv.Type()}
+			}
 		}
 	}
 
@@ -95,6 +98,30 @@ func preparePtr(rv reflect.Value) {
 	if rv.IsNil() {
 		rv.Set(reflect.New(rv.Type().Elem()))
 	}
+}
+
+func hasTag(stf reflect.StructField) bool {
+	_, ok := stf.Tag.Lookup(tagKey)
+
+	return ok
+}
+
+func getTag(stf reflect.StructField) string {
+	return stf.Tag.Get(tagKey)
+}
+
+func lookup(stf reflect.StructField) (string, string, bool) {
+	k, ok := stf.Tag.Lookup(tagKey)
+	if !ok {
+		return "", "", false
+	}
+
+	s, ok := os.LookupEnv(k)
+	if !ok {
+		return k, "", false
+	}
+
+	return k, s, true
 }
 
 func lookupAndSetString(stf reflect.StructField, rv reflect.Value) {
@@ -114,7 +141,7 @@ func lookupAndSetInt(stf reflect.StructField, rv reflect.Value) error {
 
 	i, err := strconv.ParseInt(s, 10, bits.UintSize)
 	if err != nil {
-		return wrapParseError(k, rv, err)
+		return &InvalidTypeError{k, rv.Type()}
 	}
 
 	rv.SetInt(i)
@@ -130,7 +157,7 @@ func lookupAndSetUint(stf reflect.StructField, rv reflect.Value) error {
 
 	i, err := strconv.ParseUint(s, 10, bits.UintSize)
 	if err != nil {
-		return wrapParseError(k, rv, err)
+		return &InvalidTypeError{k, rv.Type()}
 	}
 
 	rv.SetUint(i)
@@ -146,28 +173,10 @@ func lookupAndSetFloat(stf reflect.StructField, rv reflect.Value) error {
 
 	f, err := strconv.ParseFloat(s, bits.UintSize)
 	if err != nil {
-		return wrapParseError(k, rv, err)
+		return &InvalidTypeError{k, rv.Type()}
 	}
 
 	rv.SetFloat(f)
 
 	return nil
-}
-
-func lookup(stf reflect.StructField) (string, string, bool) {
-	k, ok := stf.Tag.Lookup(tagKey)
-	if !ok {
-		return "", "", false
-	}
-
-	s, ok := os.LookupEnv(k)
-	if !ok {
-		return k, "", false
-	}
-
-	return k, s, true
-}
-
-func wrapParseError(k string, rv reflect.Value, err error) error {
-	return fmt.Errorf("envconfig: failed to parse %s as %s: %w", k, rv.Kind().String(), err)
 }
