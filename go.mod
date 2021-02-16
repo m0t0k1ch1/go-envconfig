@@ -1,4 +1,4 @@
-module github.com/m0t0k1ch1/go-envconfig
+module github.com/m0t0k1ch1/go-envparser
 
 go 1.15
 
