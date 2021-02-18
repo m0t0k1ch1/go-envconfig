@@ -16,73 +16,43 @@ const (
 	testEnvKey = "GO_ENVPARSER_TEST"
 )
 
-func TestParseFailed(t *testing.T) {
-	t.Run("InvalidArgError", func(t *testing.T) {
-		t.Run("nil", func(t *testing.T) {
-			var iaerr *InvalidArgError
-			err := Parse(testEnvKey, nil)
-			testutils.Equal(t, true, errors.As(err, &iaerr))
-			testutils.Contains(t, err.Error(), "v cannot be nil")
-		})
-
-		t.Run("non-pointer string", func(t *testing.T) {
-			var iaerr *InvalidArgError
-			err := Parse(testEnvKey, string(""))
-			testutils.Equal(t, true, errors.As(err, &iaerr))
-			testutils.Contains(t, err.Error(), "v cannot be non-pointer string")
-		})
-
-		t.Run("nil *string", func(t *testing.T) {
-			var iaerr *InvalidArgError
-			err := Parse(testEnvKey, (*string)(nil))
-			testutils.Equal(t, true, errors.As(err, &iaerr))
-			testutils.Contains(t, err.Error(), "v cannot be nil *string")
-		})
+func TestParseFailedWithInvalidArgError(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		var iaerr *InvalidArgError
+		err := Parse(testEnvKey, nil)
+		testutils.Equal(t, true, errors.As(err, &iaerr))
+		testutils.Contains(t, err.Error(), "v cannot be nil")
 	})
 
-	t.Run("UnsupportedTypeError", func(t *testing.T) {
-		var b bool
-		var uterr *UnsupportedTypeError
-		err := Parse(testEnvKey, &b)
-		testutils.Equal(t, true, errors.As(err, &uterr))
-		testutils.Contains(t, err.Error(), "unsupported type: bool")
+	t.Run("non-pointer string", func(t *testing.T) {
+		var iaerr *InvalidArgError
+		err := Parse(testEnvKey, string(""))
+		testutils.Equal(t, true, errors.As(err, &iaerr))
+		testutils.Contains(t, err.Error(), "v cannot be non-pointer string")
 	})
 
-	t.Run("NotPresentError", func(t *testing.T) {
-		var s string
-		var nperr *NotPresentError
-		err := Parse(testEnvKey, &s)
-		testutils.Equal(t, true, errors.As(err, &nperr))
-		testutils.Contains(t, err.Error(), fmt.Sprintf("%s is not present", testEnvKey))
+	t.Run("nil *string", func(t *testing.T) {
+		var iaerr *InvalidArgError
+		err := Parse(testEnvKey, (*string)(nil))
+		testutils.Equal(t, true, errors.As(err, &iaerr))
+		testutils.Contains(t, err.Error(), "v cannot be nil *string")
 	})
+}
 
-	t.Run("ParseError", func(t *testing.T) {
-		t.Run("invalid int", func(t *testing.T) {
-			os.Setenv(testEnvKey, "zero")
-			defer os.Clearenv()
+func TestParseFailedWithUnsupportedTypeError(t *testing.T) {
+	var b bool
+	var uterr *UnsupportedTypeError
+	err := Parse(testEnvKey, &b)
+	testutils.Equal(t, true, errors.As(err, &uterr))
+	testutils.Contains(t, err.Error(), "unsupported type: bool")
+}
 
-			var i int
-			var perr *ParseError
-			var nerr *strconv.NumError
-			err := Parse(testEnvKey, &i)
-			testutils.Equal(t, true, errors.As(err, &perr))
-			testutils.Equal(t, true, errors.As(err, &nerr))
-			testutils.Contains(t, err.Error(), fmt.Sprintf("cannot parse %s as int", testEnvKey))
-		})
-
-		t.Run("invalid uint", func(t *testing.T) {
-			os.Setenv(testEnvKey, "zero")
-			defer os.Clearenv()
-
-			var u uint
-			var perr *ParseError
-			var nerr *strconv.NumError
-			err := Parse(testEnvKey, &u)
-			testutils.Equal(t, true, errors.As(err, &perr))
-			testutils.Equal(t, true, errors.As(err, &nerr))
-			testutils.Contains(t, err.Error(), fmt.Sprintf("cannot parse %s as uint", testEnvKey))
-		})
-	})
+func TestParseFailedWithNotPresentError(t *testing.T) {
+	var s string
+	var nperr *NotPresentError
+	err := Parse(testEnvKey, &s)
+	testutils.Equal(t, true, errors.As(err, &nperr))
+	testutils.Contains(t, err.Error(), fmt.Sprintf("%s is not present", testEnvKey))
 }
 
 func TestParseAsString(t *testing.T) {
@@ -127,6 +97,34 @@ func TestParseAsInt(t *testing.T) {
 	}
 }
 
+func TestParseAsIntFailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  strconv.Itoa(maxInt()) + "0",
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &i)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
 func TestParseAsUint(t *testing.T) {
 	cases := []struct {
 		in  string
@@ -150,6 +148,34 @@ func TestParseAsUint(t *testing.T) {
 			} else {
 				testutils.Equal(t, c.out, u)
 			}
+		})
+	}
+}
+
+func TestParseAsUintFailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  strconv.FormatUint(uint64(maxUint()), 10) + "0",
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &u)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
 		})
 	}
 }
