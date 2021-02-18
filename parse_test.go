@@ -22,6 +22,11 @@ var (
 	maxInt8String   = strconv.Itoa(math.MaxInt8)
 	overInt8String  = "128"
 
+	underInt16String = "-32769"
+	minInt16String   = strconv.Itoa(math.MinInt16)
+	maxInt16String   = strconv.Itoa(math.MaxInt16)
+	overInt16String  = "32768"
+
 	underInt32String = "-2147483649"
 	minInt32String   = strconv.Itoa(math.MinInt32)
 	maxInt32String   = strconv.Itoa(math.MaxInt32)
@@ -199,6 +204,180 @@ func TestParseAsInt8FailedWithParseError(t *testing.T) {
 			defer os.Clearenv()
 
 			var i int8
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &i)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsInt16(t *testing.T) {
+	cases := []struct {
+		in  string
+		out int16
+	}{{
+		in:  minInt16String,
+		out: math.MinInt16,
+	}, {
+		in:  maxInt16String,
+		out: math.MaxInt16,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int16
+			if err := Parse(testEnvKey, &i); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, i)
+			}
+		})
+	}
+}
+
+func TestParseAsInt16FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  underInt16String,
+		err: "value out of range",
+	}, {
+		in:  overInt16String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int16
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &i)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsInt32(t *testing.T) {
+	cases := []struct {
+		in  string
+		out int32
+	}{{
+		in:  minInt32String,
+		out: math.MinInt32,
+	}, {
+		in:  maxInt32String,
+		out: math.MaxInt32,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int32
+			if err := Parse(testEnvKey, &i); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, i)
+			}
+		})
+	}
+}
+
+func TestParseAsInt32FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  underInt32String,
+		err: "value out of range",
+	}, {
+		in:  overInt32String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int32
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &i)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsInt64(t *testing.T) {
+	cases := []struct {
+		in  string
+		out int64
+	}{{
+		in:  minInt64String,
+		out: math.MinInt64,
+	}, {
+		in:  maxInt64String,
+		out: math.MaxInt64,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int64
+			if err := Parse(testEnvKey, &i); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, i)
+			}
+		})
+	}
+}
+
+func TestParseAsInt64FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  underInt64String,
+		err: "value out of range",
+	}, {
+		in:  overInt64String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int64
 			var perr *ParseError
 			var nerr *strconv.NumError
 			err := Parse(testEnvKey, &i)
