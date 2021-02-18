@@ -28,6 +28,12 @@ func TestParseInvalidArgError(t *testing.T) {
 	testutils.TestErrorMessage(t, "v cannot be nil *string", err)
 }
 
+func TestParseUnsupportedTypeError(t *testing.T) {
+	var b bool
+	err := Parse(testEnvKey, &b)
+	testutils.TestErrorMessage(t, "unsupported type: bool", err)
+}
+
 func TestParseAsString(t *testing.T) {
 	defer os.Clearenv()
 	os.Setenv(testEnvKey, "string")
