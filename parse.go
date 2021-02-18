@@ -20,7 +20,7 @@ var (
 func Parse(k string, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
-		return &InvalidArgError{rv.Type()}
+		return &InvalidArgError{reflect.TypeOf(v)}
 	}
 	if !isSupportedKind(rv.Elem().Kind()) {
 		return &UnsupportedTypeError{rv.Elem().Type()}
