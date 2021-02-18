@@ -34,6 +34,12 @@ func TestParseUnsupportedTypeError(t *testing.T) {
 	testutils.TestErrorMessage(t, "unsupported type: bool", err)
 }
 
+func TestParseNotPresentError(t *testing.T) {
+	var s string
+	err := Parse(testEnvKey, &s)
+	testutils.TestErrorMessage(t, fmt.Sprintf("%s is not present", testEnvKey), err)
+}
+
 func TestParseAsString(t *testing.T) {
 	defer os.Clearenv()
 	os.Setenv(testEnvKey, "string")
