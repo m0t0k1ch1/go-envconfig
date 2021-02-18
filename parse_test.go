@@ -63,10 +63,6 @@ func TestParseAsInt(t *testing.T) {
 		s:   strconv.Itoa(maxInt()),
 		i:   maxInt(),
 		err: "",
-	}, {
-		s:   "zero",
-		i:   0,
-		err: fmt.Sprintf("cannot parse %s as int", testEnvKey),
 	}}
 
 	for _, c := range cases {
@@ -82,10 +78,46 @@ func TestParseAsInt(t *testing.T) {
 	}
 }
 
+func TestParseAsUint(t *testing.T) {
+	cases := []struct {
+		s   string
+		u   uint
+		err string
+	}{{
+		s:   "0",
+		u:   0,
+		err: "",
+	}, {
+		s:   strconv.FormatUint(uint64(maxUint()), 10),
+		u:   maxUint(),
+		err: "",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.s, func(t *testing.T) {
+			defer os.Clearenv()
+			os.Setenv(testEnvKey, c.s)
+
+			var u uint
+			err := Parse(testEnvKey, &u)
+			testutils.TestErrorMessage(t, c.err, err)
+			testutils.Equal(t, c.u, u)
+		})
+	}
+}
+
 func maxInt() int {
 	if bits.UintSize == 32 {
 		return math.MaxInt32
 	}
 
 	return math.MaxInt64
+}
+
+func maxUint() uint {
+	if bits.UintSize == 32 {
+		return math.MaxUint32
+	}
+
+	return math.MaxUint64
 }
