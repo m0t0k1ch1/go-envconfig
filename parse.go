@@ -12,7 +12,6 @@ var (
 		reflect.String,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64,
 	}
 )
 
@@ -76,10 +75,6 @@ func (p *parser) parse() error {
 		p.parseAndSetUint(s, 32)
 	case reflect.Uint64:
 		p.parseAndSetUint(s, 64)
-	case reflect.Float32:
-		p.parseAndSetFloat(s, 32)
-	case reflect.Float64:
-		p.parseAndSetFloat(s, 64)
 	default:
 		p.err = &UnsupportedTypeError{p.rv.Type()}
 	}
@@ -101,12 +96,4 @@ func (p *parser) parseAndSetUint(s string, bitSize int) {
 		p.err = &ParseError{err, p.k, p.rv.Type()}
 	}
 	p.rv.SetUint(u)
-}
-
-func (p *parser) parseAndSetFloat(s string, bitSize int) {
-	f, err := strconv.ParseFloat(s, bitSize)
-	if err != nil {
-		p.err = &ParseError{err, p.k, p.rv.Type()}
-	}
-	p.rv.SetFloat(f)
 }
