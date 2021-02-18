@@ -1,6 +1,7 @@
 package envparser
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/bits"
@@ -16,28 +17,34 @@ const (
 )
 
 func TestParseInvalidArgError(t *testing.T) {
-	var err error
-
-	err = Parse(testEnvKey, nil)
-	testutils.TestErrorMessage(t, "v cannot be nil", err)
-
-	err = Parse(testEnvKey, string(""))
-	testutils.TestErrorMessage(t, "v cannot be non-pointer string", err)
-
-	err = Parse(testEnvKey, (*string)(nil))
-	testutils.TestErrorMessage(t, "v cannot be nil *string", err)
+	testutils.TestErrorMessage(t, "v cannot be nil", Parse(testEnvKey, nil))
+	testutils.TestErrorMessage(t, "v cannot be non-pointer string", Parse(testEnvKey, string("")))
+	testutils.TestErrorMessage(t, "v cannot be nil *string", Parse(testEnvKey, (*string)(nil)))
 }
 
 func TestParseUnsupportedTypeError(t *testing.T) {
 	var b bool
-	err := Parse(testEnvKey, &b)
-	testutils.TestErrorMessage(t, "unsupported type: bool", err)
+	testutils.TestErrorMessage(t, "unsupported type: bool", Parse(testEnvKey, &b))
 }
 
 func TestParseNotPresentError(t *testing.T) {
 	var s string
-	err := Parse(testEnvKey, &s)
-	testutils.TestErrorMessage(t, fmt.Sprintf("%s is not present", testEnvKey), err)
+	testutils.TestErrorMessage(t, fmt.Sprintf("%s is not present", testEnvKey), Parse(testEnvKey, &s))
+}
+
+func TestParseError(t *testing.T) {
+	defer os.Clearenv()
+	os.Setenv(testEnvKey, "zero")
+
+	var i int
+	err := Parse(testEnvKey, &i)
+	testutils.TestErrorMessage(t, fmt.Sprintf("cannot parse %s as int", testEnvKey), err)
+
+	var perr *ParseError
+	testutils.Equal(t, true, errors.As(err, &perr))
+
+	var nerr *strconv.NumError
+	testutils.Equal(t, true, errors.As(err, &nerr))
 }
 
 func TestParseAsString(t *testing.T) {
@@ -45,8 +52,7 @@ func TestParseAsString(t *testing.T) {
 	os.Setenv(testEnvKey, "string")
 
 	var s string
-	err := Parse(testEnvKey, &s)
-	testutils.TestErrorMessage(t, "", err)
+	testutils.TestErrorMessage(t, "", Parse(testEnvKey, &s))
 	testutils.Equal(t, "string", s)
 }
 
@@ -71,8 +77,7 @@ func TestParseAsInt(t *testing.T) {
 			os.Setenv(testEnvKey, c.s)
 
 			var i int
-			err := Parse(testEnvKey, &i)
-			testutils.TestErrorMessage(t, c.err, err)
+			testutils.TestErrorMessage(t, c.err, Parse(testEnvKey, &i))
 			testutils.Equal(t, c.i, i)
 		})
 	}
@@ -99,8 +104,7 @@ func TestParseAsUint(t *testing.T) {
 			os.Setenv(testEnvKey, c.s)
 
 			var u uint
-			err := Parse(testEnvKey, &u)
-			testutils.TestErrorMessage(t, c.err, err)
+			testutils.TestErrorMessage(t, c.err, Parse(testEnvKey, &u))
 			testutils.Equal(t, c.u, u)
 		})
 	}
