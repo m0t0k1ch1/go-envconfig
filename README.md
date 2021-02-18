@@ -25,9 +25,11 @@ import (
 	"github.com/m0t0k1ch1/go-envparser"
 )
 
-func main() {
+func init() {
 	os.Setenv("PORT", "12345")
+}
 
+func main() {
 	var port uint16
 	if err := envparser.Parse("PORT", &port); err != nil {
 		log.Fatal(err)
