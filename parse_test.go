@@ -17,16 +17,24 @@ const (
 )
 
 var (
-	underInt64String = "-9223372036854775809"
-	minInt64String   = strconv.Itoa(math.MinInt64)
+	underInt8String = "-129"
+	minInt8String   = strconv.Itoa(math.MinInt8)
+	maxInt8String   = strconv.Itoa(math.MaxInt8)
+	overInt8String  = "128"
+
 	underInt32String = "-2147483649"
 	minInt32String   = strconv.Itoa(math.MinInt32)
 	maxInt32String   = strconv.Itoa(math.MaxInt32)
 	overInt32String  = "2147483648"
-	maxUint32String  = strconv.FormatUint(uint64(math.MaxUint32), 10)
-	overUint32String = "4294967296"
+
+	underInt64String = "-9223372036854775809"
+	minInt64String   = strconv.Itoa(math.MinInt64)
 	maxInt64String   = strconv.Itoa(math.MaxInt64)
 	overInt64String  = "9223372036854775808"
+
+	maxUint32String  = strconv.FormatUint(uint64(math.MaxUint32), 10)
+	overUint32String = "4294967296"
+
 	maxUint64String  = strconv.FormatUint(uint64(math.MaxUint64), 10)
 	overUint64String = "18446744073709551616"
 )
@@ -133,6 +141,64 @@ func TestParseAsIntFailedWithParseError(t *testing.T) {
 			defer os.Clearenv()
 
 			var i int
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &i)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsInt8(t *testing.T) {
+	cases := []struct {
+		in  string
+		out int8
+	}{{
+		in:  minInt8String,
+		out: math.MinInt8,
+	}, {
+		in:  maxInt8String,
+		out: math.MaxInt8,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int8
+			if err := Parse(testEnvKey, &i); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, i)
+			}
+		})
+	}
+}
+
+func TestParseAsInt8FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  underInt8String,
+		err: "value out of range",
+	}, {
+		in:  overInt8String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var i int8
 			var perr *ParseError
 			var nerr *strconv.NumError
 			err := Parse(testEnvKey, &i)
