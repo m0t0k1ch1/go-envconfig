@@ -16,6 +16,21 @@ const (
 	testEnvKey = "GO_ENVPARSER_TEST"
 )
 
+var (
+	underInt64String = "-9223372036854775809"
+	minInt64String   = strconv.Itoa(math.MinInt64)
+	underInt32String = "-2147483649"
+	minInt32String   = strconv.Itoa(math.MinInt32)
+	maxInt32String   = strconv.Itoa(math.MaxInt32)
+	overInt32String  = "2147483648"
+	maxUint32String  = strconv.FormatUint(uint64(math.MaxUint32), 10)
+	overUint32String = "4294967296"
+	maxInt64String   = strconv.Itoa(math.MaxInt64)
+	overInt64String  = "9223372036854775808"
+	maxUint64String  = strconv.FormatUint(uint64(math.MaxUint64), 10)
+	overUint64String = "18446744073709551616"
+)
+
 func TestParseFailedWithInvalidArgError(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
 		var iaerr *InvalidArgError
@@ -185,10 +200,10 @@ func TestParseAsUintFailedWithParseError(t *testing.T) {
 
 func underIntString() string {
 	if bits.UintSize == 32 {
-		return "-2147483649"
+		return underInt32String
 	}
 
-	return "-9223372036854775809"
+	return underInt64String
 }
 
 func minInt() int {
@@ -217,10 +232,10 @@ func maxIntString() string {
 
 func overIntString() string {
 	if bits.UintSize == 32 {
-		return "2147483648"
+		return overInt32String
 	}
 
-	return "9223372036854775808"
+	return overInt64String
 }
 
 func maxUint() uint {
@@ -237,8 +252,8 @@ func maxUintString() string {
 
 func overUintString() string {
 	if bits.UintSize == 32 {
-		return "4294967296"
+		return overUint32String
 	}
 
-	return "18446744073709551616"
+	return overUint64String
 }
