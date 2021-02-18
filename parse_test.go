@@ -62,8 +62,8 @@ func TestParseAsInt(t *testing.T) {
 		i   int
 		err string
 	}{{
-		s:   strconv.Itoa(-maxInt()),
-		i:   -maxInt(),
+		s:   strconv.Itoa(minInt()),
+		i:   minInt(),
 		err: "",
 	}, {
 		s:   strconv.Itoa(maxInt()),
@@ -108,6 +108,14 @@ func TestParseAsUint(t *testing.T) {
 			testutils.Equal(t, c.u, u)
 		})
 	}
+}
+
+func minInt() int {
+	if bits.UintSize == 32 {
+		return math.MinInt32
+	}
+
+	return math.MinInt64
 }
 
 func maxInt() int {
