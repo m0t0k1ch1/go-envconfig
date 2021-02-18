@@ -37,6 +37,12 @@ var (
 	maxInt64String   = strconv.Itoa(math.MaxInt64)
 	overInt64String  = "9223372036854775808"
 
+	maxUint8String  = strconv.FormatUint(uint64(math.MaxUint8), 10)
+	overUint8String = "256"
+
+	maxUint16String  = strconv.FormatUint(uint64(math.MaxUint16), 10)
+	overUint16String = "65536"
+
 	maxUint32String  = strconv.FormatUint(uint64(math.MaxUint32), 10)
 	overUint32String = "4294967296"
 
@@ -433,6 +439,226 @@ func TestParseAsUintFailedWithParseError(t *testing.T) {
 			defer os.Clearenv()
 
 			var u uint
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &u)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsUint8(t *testing.T) {
+	cases := []struct {
+		in  string
+		out uint8
+	}{{
+		in:  "0",
+		out: 0,
+	}, {
+		in:  maxUint8String,
+		out: math.MaxUint8,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint8
+			if err := Parse(testEnvKey, &u); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, u)
+			}
+		})
+	}
+}
+
+func TestParseAsUint8FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  overUint8String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint8
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &u)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsUint16(t *testing.T) {
+	cases := []struct {
+		in  string
+		out uint16
+	}{{
+		in:  "0",
+		out: 0,
+	}, {
+		in:  maxUint16String,
+		out: math.MaxUint16,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint16
+			if err := Parse(testEnvKey, &u); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, u)
+			}
+		})
+	}
+}
+
+func TestParseAsUint16FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  overUint16String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint16
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &u)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsUint32(t *testing.T) {
+	cases := []struct {
+		in  string
+		out uint32
+	}{{
+		in:  "0",
+		out: 0,
+	}, {
+		in:  maxUint32String,
+		out: math.MaxUint32,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint32
+			if err := Parse(testEnvKey, &u); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, u)
+			}
+		})
+	}
+}
+
+func TestParseAsUint32FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  overUint32String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint32
+			var perr *ParseError
+			var nerr *strconv.NumError
+			err := Parse(testEnvKey, &u)
+			testutils.Equal(t, true, errors.As(err, &perr))
+			testutils.Equal(t, true, errors.As(err, &nerr))
+			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsUint64(t *testing.T) {
+	cases := []struct {
+		in  string
+		out uint64
+	}{{
+		in:  "0",
+		out: 0,
+	}, {
+		in:  maxUint64String,
+		out: math.MaxUint64,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint64
+			if err := Parse(testEnvKey, &u); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, u)
+			}
+		})
+	}
+}
+
+func TestParseAsUint64FailedWithParseError(t *testing.T) {
+	cases := []struct {
+		in  string
+		err string
+	}{{
+		in:  "zero",
+		err: "invalid syntax",
+	}, {
+		in:  overUint64String,
+		err: "value out of range",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var u uint64
 			var perr *ParseError
 			var nerr *strconv.NumError
 			err := Parse(testEnvKey, &u)
