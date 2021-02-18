@@ -66,6 +66,12 @@ func TestParseError(t *testing.T) {
 	testutils.Equal(t, true, errors.As(err, &perr))
 	testutils.Equal(t, true, errors.As(err, &nerr))
 	testutils.Contains(t, err.Error(), fmt.Sprintf("cannot parse %s as int", testEnvKey))
+
+	var u uint
+	err = Parse(testEnvKey, &u)
+	testutils.Equal(t, true, errors.As(err, &perr))
+	testutils.Equal(t, true, errors.As(err, &nerr))
+	testutils.Contains(t, err.Error(), fmt.Sprintf("cannot parse %s as uint", testEnvKey))
 }
 
 func TestParseAsString(t *testing.T) {
