@@ -16,19 +16,11 @@ func Equal(t *testing.T, want, got interface{}) {
 	}
 }
 
-// TestErrorMessage checks if err message contains s.
-func TestErrorMessage(t *testing.T, s string, err error) {
+// Contains checks if s contains substr.
+func Contains(t *testing.T, s string, substr string) {
 	t.Helper()
 
-	if s == "" {
-		if err != nil {
-			t.Errorf("err is not nil: %v", err)
-			return
-		}
-		return
-	}
-
-	if contained := strings.Contains(err.Error(), s); !contained {
-		t.Errorf(`err message does not contain "%s": %v`, s, err)
+	if ok := strings.Contains(s, substr); !ok {
+		t.Errorf(`"%s" does not contain "%s"`, s, substr)
 	}
 }

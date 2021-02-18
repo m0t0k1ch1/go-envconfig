@@ -17,95 +17,122 @@ const (
 )
 
 func TestParseInvalidArgError(t *testing.T) {
-	testutils.TestErrorMessage(t, "v cannot be nil", Parse(testEnvKey, nil))
-	testutils.TestErrorMessage(t, "v cannot be non-pointer string", Parse(testEnvKey, string("")))
-	testutils.TestErrorMessage(t, "v cannot be nil *string", Parse(testEnvKey, (*string)(nil)))
+	var err error
+	var iaerr *InvalidArgError
+
+	err = Parse(testEnvKey, nil)
+	testutils.Equal(t, true, errors.As(err, &iaerr))
+	testutils.Contains(t, err.Error(), "v cannot be nil")
+
+	err = Parse(testEnvKey, string(""))
+	testutils.Equal(t, true, errors.As(err, &iaerr))
+	testutils.Contains(t, err.Error(), "v cannot be non-pointer string")
+
+	err = Parse(testEnvKey, (*string)(nil))
+	testutils.Equal(t, true, errors.As(err, &iaerr))
+	testutils.Contains(t, err.Error(), "v cannot be nil *string")
 }
 
 func TestParseUnsupportedTypeError(t *testing.T) {
+	var err error
+	var uterr *UnsupportedTypeError
+
 	var b bool
-	testutils.TestErrorMessage(t, "unsupported type: bool", Parse(testEnvKey, &b))
+	err = Parse(testEnvKey, &b)
+	testutils.Equal(t, true, errors.As(err, &uterr))
+	testutils.Contains(t, err.Error(), "unsupported type: bool")
 }
 
 func TestParseNotPresentError(t *testing.T) {
+	var err error
+	var nperr *NotPresentError
+
 	var s string
-	testutils.TestErrorMessage(t, fmt.Sprintf("%s is not present", testEnvKey), Parse(testEnvKey, &s))
+	err = Parse(testEnvKey, &s)
+	testutils.Equal(t, true, errors.As(err, &nperr))
+	testutils.Contains(t, err.Error(), fmt.Sprintf("%s is not present", testEnvKey))
 }
 
 func TestParseError(t *testing.T) {
-	defer os.Clearenv()
+	var err error
+	var perr *ParseError
+	var nerr *strconv.NumError
+
 	os.Setenv(testEnvKey, "zero")
+	defer os.Clearenv()
 
 	var i int
-	err := Parse(testEnvKey, &i)
-	testutils.TestErrorMessage(t, fmt.Sprintf("cannot parse %s as int", testEnvKey), err)
-
-	var perr *ParseError
+	err = Parse(testEnvKey, &i)
 	testutils.Equal(t, true, errors.As(err, &perr))
-
-	var nerr *strconv.NumError
 	testutils.Equal(t, true, errors.As(err, &nerr))
+	testutils.Contains(t, err.Error(), fmt.Sprintf("cannot parse %s as int", testEnvKey))
 }
 
 func TestParseAsString(t *testing.T) {
+	in := "string"
+	out := "string"
+
+	os.Setenv(testEnvKey, in)
 	defer os.Clearenv()
-	os.Setenv(testEnvKey, "string")
 
 	var s string
-	testutils.TestErrorMessage(t, "", Parse(testEnvKey, &s))
-	testutils.Equal(t, "string", s)
+	if err := Parse(testEnvKey, &s); err != nil {
+		t.Error(err)
+	} else {
+		testutils.Equal(t, out, s)
+	}
 }
 
 func TestParseAsInt(t *testing.T) {
 	cases := []struct {
-		s   string
-		i   int
-		err string
+		in  string
+		out int
 	}{{
-		s:   strconv.Itoa(minInt()),
-		i:   minInt(),
-		err: "",
+		in:  strconv.Itoa(minInt()),
+		out: minInt(),
 	}, {
-		s:   strconv.Itoa(maxInt()),
-		i:   maxInt(),
-		err: "",
+		in:  strconv.Itoa(maxInt()),
+		out: maxInt(),
 	}}
 
 	for _, c := range cases {
-		t.Run(c.s, func(t *testing.T) {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
 			defer os.Clearenv()
-			os.Setenv(testEnvKey, c.s)
 
 			var i int
-			testutils.TestErrorMessage(t, c.err, Parse(testEnvKey, &i))
-			testutils.Equal(t, c.i, i)
+			if err := Parse(testEnvKey, &i); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, i)
+			}
 		})
 	}
 }
 
 func TestParseAsUint(t *testing.T) {
 	cases := []struct {
-		s   string
-		u   uint
-		err string
+		in  string
+		out uint
 	}{{
-		s:   "0",
-		u:   0,
-		err: "",
+		in:  "0",
+		out: 0,
 	}, {
-		s:   strconv.FormatUint(uint64(maxUint()), 10),
-		u:   maxUint(),
-		err: "",
+		in:  strconv.FormatUint(uint64(maxUint()), 10),
+		out: maxUint(),
 	}}
 
 	for _, c := range cases {
-		t.Run(c.s, func(t *testing.T) {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
 			defer os.Clearenv()
-			os.Setenv(testEnvKey, c.s)
 
 			var u uint
-			testutils.TestErrorMessage(t, c.err, Parse(testEnvKey, &u))
-			testutils.Equal(t, c.u, u)
+			if err := Parse(testEnvKey, &u); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, u)
+			}
 		})
 	}
 }
