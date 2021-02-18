@@ -75,10 +75,10 @@ func TestParseAsInt(t *testing.T) {
 		in  string
 		out int
 	}{{
-		in:  strconv.Itoa(minInt()),
+		in:  minIntString(),
 		out: minInt(),
 	}, {
-		in:  strconv.Itoa(maxInt()),
+		in:  maxIntString(),
 		out: maxInt(),
 	}}
 
@@ -105,7 +105,10 @@ func TestParseAsIntFailedWithParseError(t *testing.T) {
 		in:  "zero",
 		err: "invalid syntax",
 	}, {
-		in:  strconv.Itoa(maxInt()) + "0",
+		in:  underIntString(),
+		err: "value out of range",
+	}, {
+		in:  overIntString(),
 		err: "value out of range",
 	}}
 
@@ -133,7 +136,7 @@ func TestParseAsUint(t *testing.T) {
 		in:  "0",
 		out: 0,
 	}, {
-		in:  strconv.FormatUint(uint64(maxUint()), 10),
+		in:  maxUintString(),
 		out: maxUint(),
 	}}
 
@@ -160,7 +163,7 @@ func TestParseAsUintFailedWithParseError(t *testing.T) {
 		in:  "zero",
 		err: "invalid syntax",
 	}, {
-		in:  strconv.FormatUint(uint64(maxUint()), 10) + "0",
+		in:  overUintString(),
 		err: "value out of range",
 	}}
 
@@ -180,12 +183,24 @@ func TestParseAsUintFailedWithParseError(t *testing.T) {
 	}
 }
 
+func underIntString() string {
+	if bits.UintSize == 32 {
+		return "-2147483649"
+	}
+
+	return "-9223372036854775809"
+}
+
 func minInt() int {
 	if bits.UintSize == 32 {
 		return math.MinInt32
 	}
 
 	return math.MinInt64
+}
+
+func minIntString() string {
+	return strconv.Itoa(minInt())
 }
 
 func maxInt() int {
@@ -196,10 +211,34 @@ func maxInt() int {
 	return math.MaxInt64
 }
 
+func maxIntString() string {
+	return strconv.Itoa(maxInt())
+}
+
+func overIntString() string {
+	if bits.UintSize == 32 {
+		return "2147483648"
+	}
+
+	return "9223372036854775808"
+}
+
 func maxUint() uint {
 	if bits.UintSize == 32 {
 		return math.MaxUint32
 	}
 
 	return math.MaxUint64
+}
+
+func maxUintString() string {
+	return strconv.FormatUint(uint64(maxUint()), 10)
+}
+
+func overUintString() string {
+	if bits.UintSize == 32 {
+		return "4294967296"
+	}
+
+	return "18446744073709551616"
 }
