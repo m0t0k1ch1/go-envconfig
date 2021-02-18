@@ -12,13 +12,13 @@ type InvalidArgError struct {
 
 func (e *InvalidArgError) Error() string {
 	if e.Type == nil {
-		return "envparser: v can not be nil"
+		return "envparser: v cannot be nil"
 	}
 	if e.Type.Kind() != reflect.Ptr {
-		return fmt.Sprintf("envparser: v can not be non-pointer %s", e.Type.String())
+		return fmt.Sprintf("envparser: v cannot be non-pointer %s", e.Type.String())
 	}
 
-	return fmt.Sprintf("envparser: v can not be nil %s", e.Type.String())
+	return fmt.Sprintf("envparser: v cannot be nil %s", e.Type.String())
 }
 
 // UnsupportedTypeError is returned when attempting to parse as an unsupported value type.
