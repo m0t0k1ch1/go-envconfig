@@ -87,6 +87,7 @@ func (p *parser) parseAndSetInt(s string, bitSize int) {
 	if err != nil {
 		p.err = &ParseError{err, p.k, p.rv.Type()}
 	}
+
 	p.rv.SetInt(i)
 }
 
@@ -95,5 +96,6 @@ func (p *parser) parseAndSetUint(s string, bitSize int) {
 	if err != nil {
 		p.err = &ParseError{err, p.k, p.rv.Type()}
 	}
+
 	p.rv.SetUint(u)
 }
