@@ -15,7 +15,7 @@ var (
 	}
 )
 
-// Parse parses the environment variable named by the key and stores the result in the value pointed by v.
+// Parse parses the environment variable named by k and stores the result in the value pointed by v.
 func Parse(k string, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
@@ -87,6 +87,7 @@ func (p *parser) parseAndSetInt(s string, bitSize int) {
 	if err != nil {
 		p.err = &ParseError{err, p.k, p.rv.Type()}
 	}
+
 	p.rv.SetInt(i)
 }
 
@@ -95,5 +96,6 @@ func (p *parser) parseAndSetUint(s string, bitSize int) {
 	if err != nil {
 		p.err = &ParseError{err, p.k, p.rv.Type()}
 	}
+
 	p.rv.SetUint(u)
 }
