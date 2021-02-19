@@ -1,5 +1,6 @@
 # go-envparser
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/m0t0k1ch1/go-envparser)](https://goreportcard.com/report/github.com/m0t0k1ch1/go-envparser)
 [![Go Reference](https://pkg.go.dev/badge/github.com/m0t0k1ch1/go-envparser.svg)](https://pkg.go.dev/github.com/m0t0k1ch1/go-envparser)
 ![test](https://github.com/m0t0k1ch1/go-envparser/workflows/test/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/m0t0k1ch1/go-envparser/badge.svg?branch=main)](https://coveralls.io/github/m0t0k1ch1/go-envparser?branch=main)
