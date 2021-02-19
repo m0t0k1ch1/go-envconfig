@@ -5,7 +5,7 @@
 ![test](https://github.com/m0t0k1ch1/go-envparser/workflows/test/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/m0t0k1ch1/go-envparser/badge.svg?branch=main)](https://coveralls.io/github/m0t0k1ch1/go-envparser?branch=main)
 
-parse environment variables as the specified Go type
+A tiny package to parse environment variables as the specified Go type.
 
 ## Installation
 
