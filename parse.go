@@ -15,7 +15,7 @@ var (
 	}
 )
 
-// Parse parses the environment variable named by the key and stores the result in the value pointed by v.
+// Parse parses the environment variable named by k and stores the result in the value pointed by v.
 func Parse(k string, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr || rv.IsNil() {
