@@ -12,6 +12,7 @@ var (
 		reflect.String,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Bool,
 	}
 )
 
@@ -75,6 +76,8 @@ func (p *parser) parse() error {
 		p.parseAndSetUint(s, 32)
 	case reflect.Uint64:
 		p.parseAndSetUint(s, 64)
+	case reflect.Bool:
+		p.parseAndSetBool(s)
 	default:
 		p.err = &UnsupportedTypeError{p.rv.Type()}
 	}
@@ -98,4 +101,13 @@ func (p *parser) parseAndSetUint(s string, bitSize int) {
 	}
 
 	p.rv.SetUint(u)
+}
+
+func (p *parser) parseAndSetBool(s string) {
+	switch s {
+	case "", "0":
+		p.rv.SetBool(false)
+	default:
+		p.rv.SetBool(true)
+	}
 }

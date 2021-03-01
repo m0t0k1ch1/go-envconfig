@@ -53,3 +53,5 @@ func main() {
 - uint16
 - uint32
 - uint64
+- bool
+  - `false` for `""` or `"0"`, `true` otherwise
