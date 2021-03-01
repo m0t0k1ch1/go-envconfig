@@ -74,11 +74,11 @@ func TestParseFailedWithInvalidArgError(t *testing.T) {
 }
 
 func TestParseFailedWithUnsupportedTypeError(t *testing.T) {
-	var b bool
+	var f float64
 	var uterr *UnsupportedTypeError
-	err := Parse(testEnvKey, &b)
+	err := Parse(testEnvKey, &f)
 	testutils.Equal(t, true, errors.As(err, &uterr))
-	testutils.Contains(t, err.Error(), "unsupported type: bool")
+	testutils.Contains(t, err.Error(), "unsupported type: float64")
 }
 
 func TestParseFailedWithNotPresentError(t *testing.T) {
@@ -665,6 +665,42 @@ func TestParseAsUint64FailedWithParseError(t *testing.T) {
 			testutils.Equal(t, true, errors.As(err, &perr))
 			testutils.Equal(t, true, errors.As(err, &nerr))
 			testutils.Contains(t, err.Error(), c.err)
+		})
+	}
+}
+
+func TestParseAsBool(t *testing.T) {
+	cases := []struct {
+		in  string
+		out bool
+	}{{
+		in:  "",
+		out: false,
+	}, {
+		in:  "0",
+		out: false,
+	}, {
+		in:  "1",
+		out: true,
+	}, {
+		in:  "false",
+		out: true,
+	}, {
+		in:  "true",
+		out: true,
+	}}
+
+	for _, c := range cases {
+		t.Run(c.in, func(t *testing.T) {
+			os.Setenv(testEnvKey, c.in)
+			defer os.Clearenv()
+
+			var b bool
+			if err := Parse(testEnvKey, &b); err != nil {
+				t.Error(err)
+			} else {
+				testutils.Equal(t, c.out, b)
+			}
 		})
 	}
 }
